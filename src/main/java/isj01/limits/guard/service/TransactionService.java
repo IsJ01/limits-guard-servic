@@ -1,25 +1,36 @@
 package isj01.limits.guard.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import isj01.limits.guard.db.entity.Transaction;
-import isj01.limits.guard.db.repository.TransactionRepository;
 import isj01.limits.guard.dto.TransactionCreateDto;
-import isj01.limits.guard.mapper.TransactionMapper;
+import isj01.limits.guard.exceptions.AmountLimitExceededException;
+import isj01.limits.guard.exceptions.ConcurrentTransactionException;
+import isj01.limits.guard.exceptions.LimitExceededException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class TransactionService {
 
-    private final TransactionRepository repository;
-    private final TransactionMapper mapper;
+    private final TransactionDbService dbService;
+    private final RedisService redisService;
 
-    @Transactional
     public Long create(TransactionCreateDto createDto) {
-        Transaction entity = mapper.toEntity(createDto);
-        return repository.save(entity).getId();
+        if (!redisService.tryAcquireTxLock(createDto.getUserId(), createDto.getAmount())) {
+            throw new ConcurrentTransactionException("Дублирующий запрос");
+        }
+        if (redisService.isRateLimitExceeded(createDto.getUserId())) {
+            throw new LimitExceededException("Превышена частота запросов");
+        }
+        if (redisService.isAmountLimitExceeded(createDto.getUserId())) {
+            throw new AmountLimitExceededException("Превышен суточный лимит запросов");
+        }
+
+        Long id = dbService.saveToDatabase(createDto);
+
+        redisService.incrementDailyCount(createDto.getUserId(), createDto.getAmount());
+        redisService.addRequestToLimits(createDto.getUserId());
+
+        return id;
     }
 
 }
