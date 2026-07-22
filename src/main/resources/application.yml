@@ -24,6 +24,10 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+server:
+  servlet:
+    context-path: /v1
+
 user-transaction:
   day-amount-limit: 50000
   rate-limit: 3
