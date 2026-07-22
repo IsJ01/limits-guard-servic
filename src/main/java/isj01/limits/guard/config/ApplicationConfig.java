@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
 
     @Bean
-    public Clock clock() {
+    Clock clock() {
         return Clock.system(ZoneId.of("UTC"));
     }
 

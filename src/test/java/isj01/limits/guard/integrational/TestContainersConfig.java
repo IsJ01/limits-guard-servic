@@ -5,6 +5,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -20,6 +21,11 @@ public class TestContainersConfig {
     @ServiceConnection
     RedisContainer redisContainer() {
         return new RedisContainer("redis:7-alpine");
+    }
+
+    @Bean
+    ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }
