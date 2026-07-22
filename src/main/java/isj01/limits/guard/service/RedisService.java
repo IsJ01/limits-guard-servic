@@ -50,10 +50,9 @@ public class RedisService {
 
     public void incrementDailyCount(String userId, Long amount) {
         String key = buildDailyLimitKey(userId);
-        redisTemplate.opsForValue().increment(key, amount);
+        Long newAmount = redisTemplate.opsForValue().increment(key, amount);
 
-        Long expire = redisTemplate.getExpire(key);
-        if (expire != null && expire < 0) {
+        if (newAmount != null && newAmount.equals(amount)) {
             redisTemplate.expire(key, getDurationUntilNextDay());
         }
     }
