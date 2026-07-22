@@ -1,0 +1,49 @@
+databaseChangeLog: 
+  - changeSet:
+      id: initial-schema
+      author: Isj01
+      changes:
+        - createTable:
+            tableName: transactions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_id
+                  type: VARCHAR(36)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: merchant_id
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: add-transcations-constraints
+      author: Isj01
+      changes:
+        - sql:
+            sql: |
+              ALTER TABLE transactions
+              ADD CONSTRAINT chk_user_id CHECK (TRIM(user_id) <> '');
+              ALTER TABLE transactions
+              ADD CONSTRAINT chk_amount CHECK (amount > 0);
+              ALTER TABLE transactions
+              ADD CONSTRAINT chk_merchant_id CHECK (TRIM(merchant_id) <> '');
+      rollback: 
+        - sql:
+            sql: |
+              ALTER TABLE transactions DROP CONSTRAINTS chk_user_id;
+              ALTER TABLE transactions DROP CONSTRAINTS chk_amount;
+              ALTER TABLE transactions DROP CONSTRAINTS chk_merchant_id;
+      
+

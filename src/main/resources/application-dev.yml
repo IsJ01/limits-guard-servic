@@ -1,0 +1,7 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+    open-in-view: false
