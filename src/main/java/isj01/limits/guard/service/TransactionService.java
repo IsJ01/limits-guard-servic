@@ -2,8 +2,6 @@ package isj01.limits.guard.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import isj01.limits.guard.db.entity.Transaction;
 import isj01.limits.guard.db.repository.TransactionRepository;
 import isj01.limits.guard.dto.TransactionCreateDto;
@@ -19,9 +17,9 @@ public class TransactionService {
     private final TransactionMapper mapper;
 
     @Transactional
-    public void create(@RequestBody @Validated TransactionCreateDto createDto) {
+    public Long create(TransactionCreateDto createDto) {
         Transaction entity = mapper.toEntity(createDto);
-        repository.save(entity);
+        return repository.save(entity).getId();
     }
 
 }
