@@ -15,20 +15,20 @@ public class TransactionService {
     private final RedisService redisService;
 
     public Long create(TransactionCreateDto createDto) {
-        if (!redisService.tryAcquireTxLock(createDto.getUserId(), createDto.getAmount())) {
+        if (!redisService.tryAcquireTxLock(createDto.userId(), createDto.amount())) {
             throw new ConcurrentTransactionException("Дублирующий запрос");
         }
-        if (redisService.isRateLimitExceeded(createDto.getUserId())) {
+        if (redisService.isRateLimitExceeded(createDto.userId())) {
             throw new LimitExceededException("Превышена частота запросов");
         }
-        if (redisService.isAmountLimitExceeded(createDto.getUserId())) {
+        if (redisService.isAmountLimitExceeded(createDto.userId())) {
             throw new AmountLimitExceededException("Превышен суточный лимит запросов");
         }
 
         Long id = dbService.saveToDatabase(createDto);
 
-        redisService.incrementDailyCount(createDto.getUserId(), createDto.getAmount());
-        redisService.addRequestToLimits(createDto.getUserId());
+        redisService.incrementDailyCount(createDto.userId(), createDto.amount());
+        redisService.addRequestToLimits(createDto.userId());
 
         return id;
     }

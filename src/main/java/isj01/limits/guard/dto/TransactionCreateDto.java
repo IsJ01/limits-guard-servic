@@ -1,10 +1,10 @@
 package isj01.limits.guard.dto;
 
-import lombok.Value;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
-@Value
-public class TransactionCreateDto {
-    String userId;
-    Long amount;
-    String merchantId;
+public record TransactionCreateDto (
+    @NotBlank String userId, 
+    @Positive Long amount, 
+    @NotBlank String merchantId) {
 }
