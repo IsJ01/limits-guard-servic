@@ -1,10 +1,12 @@
 package isj01.limits.guard.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
 public record TransactionCreateDto (
-    @NotBlank String userId, 
+    @JsonProperty("user_id") @NotBlank String userId, 
     @Positive Long amount, 
-    @NotBlank String merchantId) {
+    @JsonProperty("merchant_id")@NotBlank String merchantId) {
 }

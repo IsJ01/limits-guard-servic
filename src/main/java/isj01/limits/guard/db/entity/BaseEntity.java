@@ -1,5 +1,6 @@
 package isj01.limits.guard.db.entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
