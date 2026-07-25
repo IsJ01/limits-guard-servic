@@ -26,7 +26,7 @@ jobs:
           cache: maven
 
       - name: Run Tests with Maven (Testcontainers included)
-        run: ./mvnw clean test
+        run: chmod +x ./mvnw && ./mvnw clean test
 
   # ----------------------------------------------------
   # STAGE 2: CD (Сборка Docker-образа и Деплой)
