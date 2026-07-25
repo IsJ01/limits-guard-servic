@@ -5,6 +5,7 @@ on:
     branches: ["master"]
   pull_request:
     branches: ["master"]
+
 jobs:
   # ----------------------------------------------------
   # STAGE 1: CI (Проверка и тестирование)
@@ -33,7 +34,7 @@ jobs:
   build-and-deploy:
     name: Build Image & Deploy to Prod
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
@@ -62,14 +63,29 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Переходим в папку проекта на сервере
-            cd /app/limits-guard
-            
-            # Скачиваем свежий образ из Docker Hub
-            docker compose -f docker-compose.yaml pull app
-            
-            # Перезапускаем сервис с обновленным образом без простоя других сервисов
-            docker compose -f docker-compose.yaml up -d app
-            
-            # Очищаем старые неиспользуемые образы
+            cd /app
+
+            # 1. Обновляем файлы конфигурации (docker-compose.yml и т.д.)
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/${{ github.repository }}.git .
+            else
+              git pull origin master
+            fi
+
+            # 2. Пересоздаем .env файл прямо на сервере из секретов или переменных
+            cat << 'EOF' > .env
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            REDIS_PASS=${{ secrets.REDIS_PASS }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            IMAGE_TAG=${{ github.sha }}
+            EOF
+
+            # 3. Подтягиваем свежие образы и перезапускаем без тяжелой сборки
+            docker compose pull
+            docker compose up -d
+
+            # 4. Очищаем старые неиспользуемые образы
             docker image prune -f
