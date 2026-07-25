@@ -27,6 +27,7 @@ spring:
 server:
   servlet:
     context-path: /v1
+  forward-headers-strategy: native
 
 user-transaction:
   day-amount-limit: 50000
